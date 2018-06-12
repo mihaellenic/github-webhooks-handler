@@ -2,8 +2,7 @@
 
 var http = require("http"),
   url = require("url"),
-  exec = require("child_process").exec,
-  qs = require("querystring");
+  exec = require("child_process").exec;
 
 var config = require("./config.json");
 
