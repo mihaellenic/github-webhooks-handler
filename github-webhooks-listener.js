@@ -54,8 +54,8 @@ http
           // execute commands if matching events are found
           if(matchedEvents.length > 0) {
 
-            matchedEvents.map(function(event) {
-              console.log('executing event commant', event)
+            matchedEvents.forEach(function(event) {
+              console.info('executing event command:', event)
               exec(event.command, function(error, stdout, stderr) {});
             })
 
@@ -77,12 +77,14 @@ http
           console.log("[404] " + req.method + " to " + req.url);
       }
 
-      // filter and return events from the config
       function getMatchingEvents(requestEvent) {
         // fetching events from config here instead of using the config loaded at startup
         // to get the latest changes from the config file
         var events = require("./config.json").events
 
+        // TODO: implement more flexible filtering
+        // - dynamic attributes match
+        // - regex values
         var matchedEvents = events.filter(function(event){
 
           return event.repository_full_name === requestEvent.repository_full_name &&
