@@ -5,61 +5,39 @@ var http = require("http"),
   exec = require("child_process").exec,
   crypto = require("crypto");
 
+var config = require("./config.json");
+var host = config.server_config.host,
+  port = config.server_config.port;
+
   require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss.l')
 
-var config = require("./config.json");
-
-  // hmac.update('secret');
-
-
-//  console.log("SHA Secret Key", hmac.digest('hex' ))
-
-var host = config.server_config.host,
-  port = config.server_config.port,
-  serverUrl = "http://" + host + ":" + port,
-  secret_key = config.server_config.secret_key;
-
 process.on("uncaughtException", function(err) {
-  console.trace("[exception] " + err);
+  console.error("[exception] " + err);
 });
 
 http
   .createServer(function(req, res) {
-    var req_data = "";
+    var payload = "";
 
     req.on("data", function(chunk) {
-      req_data += chunk;
+      payload += chunk;
     });
 
     req.on("end", function() {
       var parsedUrl = url.parse(req.url, true);
       
-      // check authorization
-      if (parsedUrl.query["secret_key"] != secret_key) {
-        console.info("[warning] Unauthorized request " + req.url);
+      console.info(req.method, req.url, 'received from ', req.headers.referer , req.headers['user-agent']);
+
+      // parse request data
+      var data = JSON.parse(payload)
+
+      // verify request signature
+      var isSignatureCorrect = verifySignature(req.headers['x-hub-signature'], payload)
+      if(!isSignatureCorrect) {
         res.writeHead(401, "Not Authorized", { "Content-Type": "text/html" });
         res.end("401 - Not Authorized");
         return;
       }
-
-      // parse request data
-      var data = JSON.parse(req_data)
-
-      // check security signature
-      var hmac = crypto.createHmac('sha1', 'secret');
-
-      hmac.update(req_data);
-      var hubSignature = req.headers['x-hub-signature'].split('=')[1];
-      var mySignature = hmac.digest('hex')
-      console.log("x-github-signature", hubSignature)
-      console.log("hmac.digest", mySignature)
-
-      var bufferA = Buffer.from(mySignature, 'utf8')
-      var bufferB = Buffer.from(hubSignature, 'utf8')
-
-      var safe = crypto.timingSafeEqual(bufferA, bufferB)
-
-      console.log('are hashes same', safe)
 
       // get event data from request
       var requestEvent = {
@@ -107,6 +85,42 @@ http
           console.log("[404] " + req.method + " to " + req.url);
       }
 
+      // generates a signature (HMAC hex digest of the payload. Generated using the sha1 hash function and the secret as the HMAC key) 
+      // and does a time safe compare to the signature receieved in the header
+      function verifySignature(xHubSignatureHeader, payload) {
+        var secret = require("./config.json").server_config.secret;
+        
+        if(!xHubSignatureHeader && !secret) {
+          return true;
+        } else if (!xHubSignatureHeader && secret) {
+          console.error('Secret is configured on the local server but the Webhook did not contain signature header.');
+          return false;
+        } else if (xHubSignatureHeader && !secret) {
+          console.error('Webhook contains a signature header but the secret is missing from local server configuration.');
+          return false;
+        }
+
+        var hmac = crypto.createHmac('sha1', secret);
+        hmac.update(payload);
+
+        // perform a timing safe compare
+        var requestSignature = xHubSignatureHeader.split('=')[1];
+        var generatedSignature = hmac.digest('hex');
+
+        // console.log('Request signature', requestSignature);
+        // console.log('Generated signature', generatedSignature);
+
+        var isSignatureValid = crypto.timingSafeEqual(
+          Buffer.from(generatedSignature, 'utf8'), 
+          Buffer.from(requestSignature, 'utf8'));
+
+        if(!isSignatureValid) {
+          console.warn('Request signature is not valid.')
+        }
+
+        return isSignatureValid;
+      }
+
       function getMatchingEvents(requestEvent) {
         // fetching events from config here instead of using the config loaded at startup
         // to get the latest changes from the config file
@@ -131,4 +145,4 @@ http
   })
   .listen(port, host);
 
-console.info("Server running at " + serverUrl);
+console.info("Server running at http://" + host + ":" + port);
