@@ -1,0 +1,27 @@
+{
+  "name": "github-webhooks-handler",
+  "version": "1.0.0",
+  "description": "A simple configurable NodeJS server for listening and handling GitHub Webhooks",
+  "main": "github-webhooks-handler.js",
+  "dependencies": {
+    "console-stamp": "^0.2.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mihaellenic/github-webhooks-handler.git"
+  },
+  "keywords": [
+    "github-webhooks",
+    "nodejs"
+  ],
+  "author": "Mihael Lenic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mihaellenic/github-webhooks-handler/issues"
+  },
+  "homepage": "https://github.com/mihaellenic/github-webhooks-handler#readme"
+}

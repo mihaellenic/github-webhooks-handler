@@ -1,7 +1,8 @@
 {
-    "local_server_config": {
+    "server_config": {
         "host": "localhost",
         "port": 9005,
+        "path": "/update",
         "secret_key": "fp7TsWT9HKhptxyk"
     },
 

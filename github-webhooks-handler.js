@@ -4,12 +4,14 @@ var http = require("http"),
   url = require("url"),
   exec = require("child_process").exec;
 
+  require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss.l')
+
 var config = require("./config.json");
 
-var host = config.local_server_config.host,
-  port = config.local_server_config.port,
-  thisServerUrl = "http://" + host + ":" + port,
-  secret_key = config.local_server_config.secret_key;
+var host = config.server_config.host,
+  port = config.server_config.port,
+  serverUrl = "http://" + host + ":" + port,
+  secret_key = config.server_config.secret_key;
 
 process.on("uncaughtException", function(err) {
   console.error("[exception] " + err);
@@ -28,7 +30,7 @@ http
       
       // check authorization
       if (parsedUrl.query["secret_key"] != secret_key) {
-        console.warn("[warning] Unauthorized request " + req.url);
+        console.info("[warning] Unauthorized request " + req.url);
         res.writeHead(401, "Not Authorized", { "Content-Type": "text/html" });
         res.end("401 - Not Authorized");
         return;
@@ -37,7 +39,7 @@ http
       // parse request data
       var data = JSON.parse(req_data)
 
-      // get event data
+      // get event data from request
       var requestEvent = {
         repository_full_name: data && data.repository && data.repository.full_name,
         ref: data && data.ref,
@@ -47,7 +49,7 @@ http
       // handle paths
       switch (parsedUrl.pathname) {
 
-        case "/update":
+        case config.server_config.path:
 
           var matchedEvents = getMatchingEvents(requestEvent);
 
@@ -56,7 +58,13 @@ http
 
             matchedEvents.forEach(function(event) {
               console.info('executing event command:', event)
-              exec(event.command, function(error, stdout, stderr) {});
+              
+              exec(event.command, function(error, stdout, stderr) {
+                error && console.error('Error while executing command:', error )
+                stdout && console.info('Command response:', stdout)
+                stderr && console.warn("Command error", stderr)
+              });
+
             })
 
             res.writeHead(200, "OK", { "Content-Type": "text/html" });
@@ -83,7 +91,7 @@ http
         var events = require("./config.json").events
 
         // TODO: implement more flexible filtering
-        // - dynamic attributes match
+        // - dynamic attributes matching
         // - regex values
         var matchedEvents = events.filter(function(event){
 
@@ -101,4 +109,4 @@ http
   })
   .listen(port, host);
 
-console.log("Server running at " + thisServerUrl);
+console.info("Server running at " + serverUrl);
