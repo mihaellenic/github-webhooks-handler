@@ -1,0 +1,19 @@
+{
+    "server_config": {
+        "host": "localhost",
+        "port": 9005,
+        "path": "/update",
+        "secret_key": "secret_key"
+    },
+
+    "events": [
+        {
+            "repository_full_name": "petra-software/CoronaPOSv2_frontend",
+            "ref": "refs/heads/develop",
+            "event": "push",
+            "command": "echo test"
+        }
+
+    ]
+
+}
