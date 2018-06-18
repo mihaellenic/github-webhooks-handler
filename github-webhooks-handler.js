@@ -2,11 +2,17 @@
 
 var http = require("http"),
   url = require("url"),
-  exec = require("child_process").exec;
+  exec = require("child_process").exec,
+  crypto = require("crypto");
 
   require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss.l')
 
 var config = require("./config.json");
+
+  // hmac.update('secret');
+
+
+//  console.log("SHA Secret Key", hmac.digest('hex' ))
 
 var host = config.server_config.host,
   port = config.server_config.port,
@@ -14,7 +20,7 @@ var host = config.server_config.host,
   secret_key = config.server_config.secret_key;
 
 process.on("uncaughtException", function(err) {
-  console.error("[exception] " + err);
+  console.trace("[exception] " + err);
 });
 
 http
@@ -38,6 +44,22 @@ http
 
       // parse request data
       var data = JSON.parse(req_data)
+
+      // check security signature
+      var hmac = crypto.createHmac('sha1', 'secret');
+
+      hmac.update(req_data);
+      var hubSignature = req.headers['x-hub-signature'].split('=')[1];
+      var mySignature = hmac.digest('hex')
+      console.log("x-github-signature", hubSignature)
+      console.log("hmac.digest", mySignature)
+
+      var bufferA = Buffer.from(mySignature, 'utf8')
+      var bufferB = Buffer.from(hubSignature, 'utf8')
+
+      var safe = crypto.timingSafeEqual(bufferA, bufferB)
+
+      console.log('are hashes same', safe)
 
       // get event data from request
       var requestEvent = {
