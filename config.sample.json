@@ -8,10 +8,11 @@
 
     "events": [
         {
+            "event_name": "CoronaPOS Frontend DEV deployment",
             "repository_full_name": "petra-software/CoronaPOSv2_frontend",
             "ref": "refs/heads/develop",
             "event": "push",
-            "command": "echo test"
+            "action": "echo test"
         }
 
     ]

@@ -53,16 +53,16 @@ http
 
           var matchedEvents = getMatchingEvents(requestEvent);
 
-          // execute commands if matching events are found
+          // execute actions on matching events
           if(matchedEvents.length > 0) {
 
             matchedEvents.forEach(function(event) {
-              console.info('executing event command:', event)
+              console.info('Executing event\'s action:', event.event_name)
               
-              exec(event.command, function(error, stdout, stderr) {
-                error && console.error('Error while executing command:', error )
-                stdout && console.info('Command response:', stdout)
-                stderr && console.warn("Command error", stderr)
+              exec(event.action, function(error, stdout, stderr) {
+                error && console.error('Error while executing ' + event.event_name + ' action:', error )
+                stdout && console.info(event.event_name + ' action response:', stdout)
+                stderr && console.warn(event.event_name + ' action error', stderr)
               });
 
             })
