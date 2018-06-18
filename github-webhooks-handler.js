@@ -67,9 +67,9 @@ http
               console.info('Executing event\'s action:', event.event_name)
               
               exec(event.action, function(error, stdout, stderr) {
-                error && console.error('Error while executing ' + event.event_name + ' action:', error )
+                error && console.error(event.event_name + ' action execution error:', error )
                 stdout && console.info(event.event_name + ' action response:', stdout)
-                stderr && console.warn(event.event_name + ' action error', stderr)
+                stderr && console.warn(event.event_name + ' action error response', stderr)
               });
 
             })
@@ -81,7 +81,7 @@ http
 
             res.writeHead(404, "Not found", { "Content-Type": "text/html" });
             res.end("404 Not found");
-            console.log('No matching events found.')
+            console.info('No matching events found.')
 
           }
           break;
@@ -89,7 +89,7 @@ http
         default:
           res.writeHead(404, "Not found", { "Content-Type": "text/html" });
           res.end("404 Not found");
-          console.log("[404] " + req.method + " to " + req.url);
+          console.info("[404] " + req.method + " to " + req.url);
       }
 
       function validateRequestEventData(data) {
