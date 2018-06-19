@@ -9,7 +9,7 @@ Sample configuration file:
 {
     "server_config": {
         "host": "0.0.0.0",
-        "port": 9005,
+        "port": 9000,
         "path": "/update",
         "secret": "sample_secret_key"
     },
@@ -42,6 +42,6 @@ Events configuration:
 - `action` - The bash command to execute when matching Webhook event is recieved
 
 # GitHub Webhook configuration
-- `Payload URL` - URL of webhook handler server (i.e. http://my-domain-or-ip:8000)
+- `Payload URL` - URL of webhook handler server (i.e. http://my-domain-or-ip:9000)
 - `Content Type` - Currently only `application/json` content type is supported
 - `Secret` - Secret key used for webhook signature validation. The same secret key should be entered in the webhook server configuration (`server_config.secret`)
