@@ -5,16 +5,13 @@
         "path": "/update",
         "secret": "secret_key"
     },
-
     "events": [
         {
-            "event_name": "CoronaPOS Frontend DEV deployment",
-            "repository_full_name": "petra-software/CoronaPOSv2_frontend",
+            "event_name": "Sample project DEV deploy",
+            "repository_full_name": "sample-user/sample-project",
             "ref": "refs/heads/develop",
             "event": "push",
-            "action": "echo test"
+            "action": "echo Hello sample world!"
         }
-
     ]
-
 }
