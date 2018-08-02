@@ -28,7 +28,7 @@ http
       console.info(req.method, req.url, 'received from ', req.headers['user-agent']);
 
       // verify request signature
-      var is_signature_correct = verifySignature(req.headers['x-hub-signature'], payload)
+      var is_signature_correct = verifyGitHubSignature(req.headers['x-hub-signature'], payload)
       if(!is_signature_correct) {
         res.writeHead(401, "Not Authorized", { "Content-Type": "text/html" });
         res.end("401 Not Authorized");
@@ -56,7 +56,7 @@ http
       // handle paths
       switch (req.url) {
 
-        case config.server_config.path:
+        case config.github_webhooks.api_path:
 
           var matched_events = getMatchingEvents(request_event);
 
@@ -99,8 +99,8 @@ http
  
       // generates a signature (HMAC hex digest of the payload. Generated using the sha1 hash function and the secret as the HMAC key) 
       // and does a time safe compare to the signature receieved in the header
-      function verifySignature(x_hub_signature_header, payload) {
-        var secret = require("./config.json").server_config.secret;
+      function verifyGitHubSignature(x_hub_signature_header, payload) {
+        var secret = require("./config.json").github_webhooks.secret;
         
         if(!x_hub_signature_header && !secret) {
           console.warn('Secret is not set on this webhook. Consider setting it up to improve security.')
@@ -144,7 +144,7 @@ http
       function getMatchingEvents(request_event) {
         // fetching events from config here instead of using the config loaded at startup
         // to get the current content from the config file
-        var events = require("./config.json").events
+        var events = require("./config.json").github_webhooks.events
 
         // TODO: implement more flexible filtering
         // - dynamic attributes matching
